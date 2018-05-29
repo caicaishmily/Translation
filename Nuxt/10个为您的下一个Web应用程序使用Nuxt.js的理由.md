@@ -157,3 +157,7 @@ Nuxt.js为您设置了Babel，因此所有.vue文件和您在<script>标记内�
 *   [Best Practices for Nuxt.js SEO](https://medium.com/vue-mastery/best-practices-for-nuxt-js-seo-32399c49b2e5)
 *   [VuePress vs. Nuxt.js](https://medium.com/p/ffc46cc38756/edit)
 *   [How to Create Vue.js Transitions](https://medium.com/vue-mastery/how-to-create-vue-js-transitions-6487dffd0baa)
+
+
+### 原文链接
+  https://medium.com/vue-mastery/10-reasons-to-use-nuxt-js-for-your-next-web-application-522397c9366b
