@@ -94,53 +94,53 @@ $ vue init nuxt-community/starter-template <project-name>
 
 ### 5\. 轻松设置您的路由之间的转换
 
-Vue has a wrapper <transition> element that makes it simple to handle JavaScript animations, CSS animations, and CSS transitions on your elements or components.
+Vue有一个包装器<transition>元素，可以很容易地处理元素或组件的JavaScript动画，CSS动画和CSS转换。
 
-If you need a refresher on Vue’s <transition> element and transitions in general, we wrote an article about them [here](https://medium.com/vue-mastery/how-to-create-vue-js-transitions-6487dffd0baa).
+如果您需要对Vue的<transition>元素和总体转换进行复习，我们会写一篇关于它们的文章 [点击这儿](https://medium.com/vue-mastery/how-to-create-vue-js-transitions-6487dffd0baa).
 
-Nuxt.js sets up your routes in such a way that each page gets wrapped in a <transition> element so you can create transitions between pages simply.
+Nuxt.js以这样的方式设置路由，即每个页面都包装在<transition>元素中，这样您就可以简单地在页面之间创建切换。
 
-[Click here](https://nuxtjs.org/examples/routes-transitions/) to see an example of how Nuxt.js helps you with page transitions.
+[点击这儿](https://nuxtjs.org/examples/routes-transitions/) 查看Nuxt.js如何帮助您进行页面转换的示例。
 
-### 7\. Easily write Single File Components
+### 7\. 轻松编写单个文件组件
 
-In many small Vue projects, components are defined using Vue.component, followed by new Vue({ el: ‘#container’ }) to target a container element in the body of every page.
+在许多小型的Vue项目中，组件是使用Vue.component定义的，然后是新的Vue({ el: ‘#container’ })来定位每个页面主体中的容器元素。
 
-This works well for small projects where JavaScript is only used to enhance certain views. But in bigger projects it can become difficult to manage.
+这适用于JavaScript仅用于增强某些视图的小型项目。 但是在更大的项目中，它可能变得难以管理。
 
-All of these problems are solved by **single-file components** with a .vue extension. In order to use them, you have to set up a build process with tools like Webpack and Babel.
+所有这些问题都可以通过带有.vue扩展名的**单文件组件**来解决。 为了使用它们，你必须使用Webpack和Babel等工具来建立一个构建过程。
 
-Here’s an example of a single-file .vue component
+这里是一个单文件.vue组件的例子
 
 ![](https://p0.ssl.qhimg.com/t014e678f63d5858d98.png)
 
-Nuxt.js comes pre-configured out of the box with Webpack for you so you can start using .vue files without having to set up a complicated build process yourself.
+Nuxt.js是为Webpack预先配置的，因此您可以开始使用.vue文件，而无需亲自设置复杂的构建过程。
 
-To learn more about Single File Components visit the Vue documentation [here](https://vuejs.org/v2/guide/single-file-components.html).
+要了解有关单个文件组件的更多信息，请访问Vue文档[点击这儿](https://vuejs.org/v2/guide/single-file-components.html).
 
-### 8\. Get ES6/ES7 compilation without any extra work
+### 8\. 无需额外工作即可获得ES6 / ES7编译
 
-Alongside Webpack, Nuxt.js also comes pre-packaged with Babel. Babel handles compiling the latest JavaScript versions like ES6 and ES7 into JavaScript that can be run on older browsers.
+除Webpack之外，Nuxt.js还预装了Babel。 Babel处理将最新的JavaScript版本（如ES6和ES7）编译为可在旧版浏览器上运行的JavaScript。
 
-Nuxt.js sets up Babel for you so all of the .vue files and all of the ES6 code that you write inside of the <script> tags compiles down into JavaScript that will work on all browsers.
+Nuxt.js为您设置了Babel，因此所有.vue文件和您在<script>标记内编写的所有ES6代码都可以编译成适用于所有浏览器的JavaScript。
 
-[Click here](https://babeljs.io/) to learn more about Babel.
+[点击这儿](https://babeljs.io/) 了解更多有关Babel
 
 ![](https://cdn-images-1.medium.com/max/1600/1*IpbVaWq2fHkbVoHtSc-LDQ.png)
 
-### 9\. Get setup with an auto-updating server for easy development
+### 9\. 使用自动更新服务器进行设置以简化开发
 
-Compared to setting up this process yourself or the change-refresh-change-refresh process that we web developers are used to, developing with Nuxt.js is a breeze. It sets you up with an auto-updating development server.
+与自己设置此过程或我们web开发人员习惯的更改 - 刷新 - 更改 - 刷新过程相比，使用Nuxt.js进行开发非常轻松。 它为你设置了一个自动更新的开发服务器。
 
-While you’re developing and working on those .vue files, Nuxt.js uses a Webpack configuration to check for changes and compiles everything for you.
+在您开发和处理这些.vue文件时，Nuxt.js使用Webpack配置来检查更改并为您编译所有内容。
 
-You can run the command npm run dev inside of a Nuxt.js project and it will set up the development server.
+您可以在Nuxt.js项目中运行命令npm run dev，它将设置开发服务器。
 
 ![](https://cdn-images-1.medium.com/max/1600/1*0zxBhC7ArC1I1MuDOd3uZg.png)
 
-### 10\. Access to everything in the Nuxt.js community
+### 10\. 访问Nuxt.js社区中的所有内容
 
-Lastly, there’s [a GitHub collection](https://github.com/nuxt-community) called **Nuxt Community** that compiles helpful libraries, modules, starter kits, and more to make it even easier to create your app. Look through here to see if what you need is available before coding it yourself.
+最后，有一个名为** Nuxt Community **的[GitHub集合]（https://github.com/nuxt-community）， 它编译了有用的库，模块，入门套件等，使它更容易创建您的应用程序。 在您自己编写代码之前，请通过此处查看您需要的内容。
 
 ![](https://cdn-images-1.medium.com/max/1600/0*puQ2jCgJYY9sYTMs.png)
 
