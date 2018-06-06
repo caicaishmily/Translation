@@ -602,7 +602,6 @@ SSR提供更好的SEO，更快的初始负载和缓存页面的能力，但通�
 
 [Hiring? Meet the Top 10 Freelance Vue.js Developers for Hire in May 2018](https://www.toptal.com/vue-js)
 
-
-###原文链接：
+### 原文链接：
 
  https://www.toptal.com/vue-js/server-side-rendered-vue-js-using-nuxt-js
