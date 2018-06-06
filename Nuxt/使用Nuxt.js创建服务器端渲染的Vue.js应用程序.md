@@ -363,3 +363,246 @@ plugins: ['~/plugins/vue-notifications']
 这样就完成了目录结构的概要。 这可能看起来很多，但如果你正在开发一个Vue应用程序，你已经设置了相同的逻辑。 Nuxt有助于抽象化设置并帮助您专注于构建。
 
 Nuxt不仅仅是帮助开发。 它通过提供额外的功能来超越您的组件。
+
+
+### Nuxt的增压组件
+
+当我第一次开始研究Nuxt时，我不断阅读有关页面组件是如何被超载的。 它听起来很棒，但它并不是很明显，究竟是什么意思，它带来了什么好处。
+
+这意味着所有的页面组件都有附加的附加方法，Nuxt可以使用它来提供附加功能。 事实上，我们已经在前面看到过其中一种，当我们使用验证方法检查参数并在用户无效时重定向用户。
+
+Nuxt项目中使用的两个主要是asyncData和fetch方法。 两者在概念上非常相似，它们在生成组件之前以_asynchronously_方式运行，并且可以用它们来填充组件和存储的数据。 它们还可以使页面在发送到客户端之前在服务器上完全呈现，即使我们必须等待某些数据库或API调用。
+
+asyncData和fetch之间有什么区别？
+
+*   asyncData用于填充页面组件的数据。 当您返回一个对象时，它将在渲染前与数据输出合并。
+*   fetch用于填充Vuex Store。 如果你返回一个promise，Nuxt将等待，直到它在渲染前解决。
+
+所以让我们把它们变得更好用。 较早的时候不知你是否记得在/products/view页面，我们遇到了一个问题，即在我们假的API调用正在进行时，store的初始状态会短暂显示？ 解决这个问题的一种方法是在组件或应用store中存储布尔值，例如load = true，然后在API调用完成时显示加载组件。 之后，我们将设置loading= false并显示数据。
+
+相反，让我们在呈现之前使用抓取来填充store。 在一个名为/products/view-async的新页面中，让我们更改创建的方法以获取; 这应该工作，对吗？
+
+```js
+export default {
+ fetch () {
+   // Unfortunately the below line throws an error
+   // because 'this.$store' is undefined...
+   this.$store.dispatch('product/load')
+ },
+ computed: {...}
+}
+
+```
+
+这里有一个问题：这些“增压”方法在创建组件之前运行_before_，所以这不会指向组件，也不会访问组件。 那么我们如何在这里访问store？
+
+### 上下文API
+
+当然，有一个解决方案。 在Nuxt的所有方法中，都提供了一个参数（通常是第一个参数），其中包含一个非常有用的名为Context的对象。 这就是你需要在整个应用程序中引用的所有内容，这意味着我们不需要等待Vue首先在组件上创建这些引用。
+
+我强烈建议查看[Context docs](https://nuxtjs.org/api/context/) 里面有什么可用的，一些便利的应用程序，您可以在其中访问所有插件，重定向，可用于更改路由，显示错误页面的错误以及路由，查询和存储等一些不言自明的插件。
+
+因此，要访问store，我们可以解构上下文并从中提取store。 我们还需要确保我们返回一个promise，以便Nuxt可以在渲染组件之前等待它解决，因此我们还需要对Store操作进行一些小调整。
+
+```js
+// Component
+export default {
+ fetch ({ store }) {
+   return store.dispatch('product/load')
+ },
+ computed: {...}
+}
+
+// Store Action
+load ({ commit }) {
+ return new Promise(resolve => {
+   setTimeout(() => {
+     commit('update', { _id: 1, title: 'Product', price: 99.99 })
+     resolve()
+   }, 1000)
+ })
+}
+
+```
+
+您可以根据您的编码风格使用async/await或其他方法，但概念是相同的 - 我们告诉Nuxt确保API调用完成，并且Store更新结果_before_尝试渲染组件。 如果您尝试导航到/products/view-async，则无法看到产品处于初始状态的内容的闪光灯。
+
+您可以想象，即使没有SSR，这在任何Vue应用程序中都可能有用。 上下文也可用于所有中间件以及NuxtServerInit等其他Nuxt方法，这是一个在Store初始化之前运行的特殊存储操作（下一部分将给出一个示例）
+
+## 使用SSR时的注意事项
+
+我相信很多（包括我自己）在开始使用像Nuxt这样的技术的同时，像处理任何其他Vue项目一样，最终遇到了一个我们知道通常工作的墙，在Nuxt中似乎是不可能的。 由于更多的这些注意事项被记录在案，它会更容易克服，但开始调试时要考虑的主要问题是客户端和服务器是两个独立的实体。
+
+当您最初访问页面时，会向Nuxt发送请求，服务器将尽可能多地构建该页面和应用程序的其余部分，然后服务器将其发送给您。 然后，客户的责任是在需要时继续导航和加载块。
+
+我们希望服务器尽可能多地做，但有时它不能访问它需要的信息，这会导致客户端完成工作。 或者更糟的是，当客户端呈现的最终内容与服务器预期的内容不同时，客户端会被告知从头开始重新构建它。 这是一个很大的迹象表明应用程序逻辑有问题。 值得庆幸的是，如果开始发生错误，您的浏览器控制台（在开发模式）会生成一个错误。
+
+我们举一个例子来说明如何解决一个常见问题，会话管理。 想象一下，您有一个Vue应用程序，您可以在其中登录帐户，并使用您决定保留在localStorage中的令牌（例如JWT）存储会话。 当您最初访问站点时，您需要根据API对该令牌进行身份验证，该API会返回一些基本的用户信息（如果有效）并将该信息放入应用store中。
+
+阅读Nuxt的文档后，您会看到有一个称为NuxtServerInit的方便方法，它允许您在初始加载时异步填充Store。 这听起来很完美！ 因此，您可以在Store中创建用户模块，并在Store目录的index.js文件中添加适当的操作：
+
+```js
+export const actions = {
+ nuxtServerInit ({ dispatch }) {
+   // localStorage should work, right?
+   const token = localStorage.getItem('token')
+   if (token) return dispatch('user/load', token)
+ }
+}
+
+```
+
+刷新页面时，出现错误，localStorage未定义。 想想这是怎么回事，这是有道理的。 此方法在服务器上运行，它不知道客户端上存储在localStorage中的内容; 实际上，它甚至不知道“localStorage”是什么！ 所以这不是一个选项。
+
+![The server tries to execute localStorage.getItem('token') but throws an error, then a caption below explaining the problem.](https://p0.ssl.qhimg.com/t0186255de2c95385cb.png)
+
+那么解决方案是什么？ 其实有几个。 您可以让客户初始化store，但最终失去了SSR的好处，因为客户最终完成了所有的工作。 您可以在服务器上设置会话，然后使用它来验证用户，但这是另一个要设置的层。 最类似于localStorage方法的是使用cookie。
+
+Nuxt可以访问cookie，因为它们是通过客户端向服务器发送的请求发送的。 与其他Nuxt方法一样，nuxtServerInit可以访问Context，这次是第二个参数，因为第一个参数是为store保留的。 在上下文中，我们可以访问req对象，该对象存储来自客户端请求的所有标题和其他信息。 （如果您使用过Node.js，这将特别熟悉）
+
+因此，在将令牌存储在cookie中（在本例中称为“令牌”）之后，让我们在服务器上访问它。
+
+```js
+import Cookie from 'cookie'
+
+export const actions = {
+ nuxtServerInit ({ dispatch }, { req }) {
+   const cookies = Cookie.parse(req.headers.cookie || '')
+   const token = cookies['token'] || ''
+   if (token) return dispatch('user/load', token)
+ }
+}
+
+```
+
+一个简单的解决方案，但可能并不明显。 学习思考某些行为发生在何处（客户端，服务器或两者）以及他们可以访问的内容需要一些时间，但好处是值得的。
+
+## 部署
+
+使用Nuxt进行部署非常简单。 使用相同的代码库，您可以创建一个SSR应用程序，单页面应用程序或静态页面。
+
+### 服务器端渲染的应用程序（SSR App）
+
+这可能是您在使用Nuxt时瞄准的目标。 这里部署的基本概念是在您选择的任何平台上运行构建过程并设置一些配置。 我将使用[docs](https://nuxtjs.org/faq/heroku-deployment)中的Heroku示例
+
+首先，在package.json中为Heroku设置脚本：
+
+```js
+"scripts": {
+ "dev": "nuxt",
+ "build": "nuxt build",
+ "start": "nuxt start",
+ "heroku-postbuild": "npm run build"
+}
+
+```
+
+然后使用heroku-cli设置Heroku环境([setup instructions here](https://devcenter.heroku.com/articles/heroku-cli):
+
+```bash
+# set Heroku variables
+heroku config:set NPM_CONFIG_PRODUCTION=false
+heroku config:set HOST=0.0.0.0
+heroku config:set NODE_ENV=production
+
+# deploy
+git push heroku master
+
+```
+
+就是这样。 现在您的SSR Vue应用程序已准备好供全世界观看。 其他平台有不同的设置，但过程相似。 目前列出的官方部署方法是：
+
+*   [Now](https://nuxtjs.org/faq/now-deployment)
+*   [Dokku (Digital Ocean)](https://nuxtjs.org/faq/dokku-deployment)
+*   [Nginx](https://nuxtjs.org/faq/nginx-proxy)
+
+### 单页面应用(SPA)
+
+如果您想利用Nuxt提供的一些额外功能，但要避免服务器试图渲染页面，则可以将其部署为SPA。
+
+首先，最好在不使用SSR的情况下测试您的应用程序，因为默认情况下npm run dev在SSR上运行。 要改变它，请编辑nuxt.config.js文件并添加以下选项：
+
+```js
+mode: 'spa',
+
+```
+
+现在，当你运行npm run dev时，SSR将被关闭，应用程序将作为SPA来运行，供你测试。 这个设置也确保了未来的版本将包含SSR。
+
+如果一切看起来都很好，那么部署与SSR应用程序完全相同。 请记住，您需要先设置模式：'spa'，让构建过程知道您需要SPA。
+
+### 静态页面
+
+如果您根本不想处理服务器，而是想生成可用于静态托管服务（例如Surge或Netlify）的页面，则可以选择此选项。 请记住，如果没有服务器，您将无法访问上下文中的req和res，因此如果您的代码依赖于此，请确保符合它。 例如，在生成示例项目时，nuxtServerInit函数会引发错误，因为它试图从请求头中的cookie中获取令牌。 在这个项目中，这并不重要，因为这些数据并没有在任何地方使用，但在实际的应用程序中，需要有另一种方式来访问这些数据。
+
+一旦排序，部署就很容易。 您可能需要首先更改的一件事是添加一个选项，以便nuxt generate命令也会创建一个后备文件。 这个文件会提示主机服务让Nuxt处理路由而不是主机服务，并抛出404错误。 为此，请将以下行添加到nuxt.config.js中：
+
+```js
+generate: { fallback: true },
+
+```
+
+这里有一个使用Netlify的例子，它目前不在Nuxt文档中。 请记住，如果这是您第一次使用netlify-cli，系统会提示您进行身份验证：
+
+```bash
+# install netlify-cli globally
+npm install netlify-cli -g
+
+# generate the application (outputs to dist/ folder)
+npm run generate
+
+# deploy
+netlify deploy dist
+
+```
+
+就这么简单！ 正如本文开头提到的那样，这个项目有一个版本[here](https://nuxt-example.netlify.com/). 以下服务还有官方部署文档：
+
+*   [Surge](https://nuxtjs.org/faq/surge-deployment)
+*   [GitHub Pages](https://nuxtjs.org/faq/github-pages)
+
+## 了解更多
+
+Nuxt正在迅速更新，而这只是其提供的一小部分功能。 我希望这篇文章鼓励您尝试一下，看看它是否有助于改进Vue应用程序的功能，使您能够更快地开发并利用其强大的功能。
+
+如果你正在寻找更多的信息，那么看看Nuxt的官方链接：
+
+*   [Documentation](https://nuxtjs.org)
+*   [Playground](https://glitch.com/edit/#!/nuxt-hello-world)
+*   [GitHub](https://github.com/nuxt/nuxt.js)
+*   [FAQ](https://nuxtjs.org/faq)
+
+寻找你的JavaScript游戏？ 尝试阅读Toptaler MarkoMišura的[JavaScript设计模式综合指南](https://www.toptal.com/javascript/comprehensive-guide-javascript-design-patterns)
+
+## 理解基础
+
+### 什么是Vue.js?
+
+Vue.js（或简称Vue）是一个JavaScript框架，其设计轻巧易学，而且功能强大，足以处理大型应用程序。 它允许您开发丰富的交互式Web应用程序，以提供卓越的用户体验。
+
+### 什么是Nuxt?
+
+Nuxt是创建通用Vue应用程序的框架。 这意味着它为您的项目提供了一个结构，为您处理更复杂的服务器配置，并允许在各种环境中部署相同的代码库。
+
+### Vue和Nuxt开源吗?
+
+是的，他们的两个代码库都可以在GitHub上公开查看，并且正在持续开发中。 两个都有核心团队，并得到社区的支持。 在那里跟踪问题，欢迎任何人提出改进建议或提交拉取请求。
+
+### 客户端和服务器端意味着什么?
+
+客户端是指用于请求并最终显示网页的设备，例如，当您浏览网站时，您的计算机/平板电脑/手机上的浏览器。 服务器端是指接收网页请求并发送相应文件以显示该网页的服务器。
+
+### 服务器端渲染有什么好处?
+
+SSR提供更好的SEO，更快的初始负载和缓存页面的能力，但通常意味着更多的服务器请求和整页重新加载。 将SSR与客户端框架（如Vue）的优点相结合，可以提供丰富的用户交互和就地DOM更新，使Nuxt成为一个出色的解决方案。
+
+### 什么是虚拟DOM?
+
+像Vue.js这样的框架允许部分更新网页的文档对象模型（DOM）。 但是，直接的DOM更新是耗时的，所以相反，自Vue.js 2.0以来，DOM的虚拟副本保存在内存中，首先在那里进行更改，而高效更新定期将这些更改添加到真实DOM中。
+
+[Hiring? Meet the Top 10 Freelance Vue.js Developers for Hire in May 2018](https://www.toptal.com/vue-js)
+
+
+###原文链接：
+
+ https://www.toptal.com/vue-js/server-side-rendered-vue-js-using-nuxt-js
