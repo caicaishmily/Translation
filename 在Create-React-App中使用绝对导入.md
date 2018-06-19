@@ -1,6 +1,6 @@
 ![](https://p0.ssl.qhimg.com/t01837865899c4318c4.png)
 
-By default ES6 modules in create-react-app use relative paths, which is fine for cases where the files you’re importing are relatively close within the file tree:
+默认情况下，create-react-app中的ES6模块使用相对路径，这适用于您要导入的文件在文件树中相对比较近的情况：
 
 ```
 import { createGoal } from ‘./actions’
@@ -14,7 +14,7 @@ import { selectAuth } from ‘./selectors’;
 import App from ‘../App’;
 ```
 
-But using relative paths is a real pain when you start dealing with deeply nested tree structures because you end up with dot-dot syndrome:
+但是当你开始处理深度嵌套的树结构时，你就会发现使用相对路径是真的让人痛苦不堪，因为你最终会出现点状综合征：
 
 ```
 import { editUser } from ‘../../../AppContainer/actions’;
@@ -24,11 +24,11 @@ import { editUser } from ‘../../../AppContainer/actions’;
 import { selectAuth } from ‘../../../AppContainer/selectors;
 ```
 
-And what happens when you decide you want to move that file? Or maybe you want to import the same module in another file?
+当你决定移动该文件时会发生什么？ 或者，也许你想在另一个文件中导入相同的模块？
 
-It was tedious enough counting how many dots you needed to traverse the first time but now you must recount every single time because as you change the location of a file you also change its relative path with respect to other files.
+计算第一次遍历需要多少个点的时间非常繁琐，但现在您必须重新计算每一次，因为当您更改文件的位置时，还会相对于其他文件更改其相对路径。
 
-What if there was a way to import a file the same way every time, regardless of where the file sat in relation to another? This is where absolute imports come in handy:
+如果有一种方法每次都以相同的方式导入文件，无论文件与另一文件相关的位置如何？ 这个时候绝对引入就派上用场了：
 
 ```
 import { editUser } from ‘containers/AppContainer/actions’;
@@ -38,20 +38,20 @@ import { editUser } from ‘containers/AppContainer/actions’;
 import { selectAuth } from ‘containers/AppContainer/selectors;
 ```
 
-No matter where you import those files from the path will be the same. No more counting dots.
+无论你从哪里导入这些文件，路径都是一样的。 不用计算要用多少个点。
 
-**Implementing Absolute Imports in Create-React-App**
+**在Create-React-App中实现绝对导入**
 
-After digging through a bunch of github issues I was finally able boil down the steps required to implement absolute imports in create-react-app applications down to two steps:
+在深入了解一堆github issue之后，我终于完成了在create-react-app应用程序中实现绝对导入所需的步骤，最终完成了两个步骤：
 
-1.  Create a ‘.**env**’ file at the root level (same level as package.json)
-2.  Set an environment variable, ‘**NODE_PATH**’ to ‘**src**/’
+1.  在根级目录创建'.** env **'文件（与package.json的级别相同）
+2.  设置一个环境变量， ‘**NODE_PATH**’ to ‘**src**/’
 
-And that’s it.
+就是这样
 
-From what I understand, create-react-app is configured in such a way that its webpack configuration will automatically pick up ‘.env’ files and read the ‘NODE_PATH’ environment variable, which can then be used for absolute imports.
+据我所知，create-react-app的配置方式是它的webpack配置会自动选取'.env'文件并读取'NODE_PATH'环境变量，然后可用于绝对导入.
 
-Custom environment variables also work both during development and in production because the variables are embedded during build time instead of runtime, so your app will have access to its environment by ‘process.env’:
+自定义环境变量在开发和生产过程中都可以使用，因为变量是在构建时嵌入的，而不是运行时嵌入的，所以你的应用程序可以通过'process.env'访问它的环境：
 
 [https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-custom-environment-variables](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-custom-environment-variables)
 
@@ -67,27 +67,27 @@ The pull requests:
 
 [https://github.com/facebookincubator/create-react-app/pull/342/files](https://github.com/facebookincubator/create-react-app/pull/342/files)
 
-Here’s a quick example of converting from relative to absolute imports. First we create our files and folders.
+以下是从相对导入转换为绝对导入的快速示例。 首先我们创建我们的文件和文件夹。
 
 ![](https://p0.ssl.qhimg.com/t01d63ed268bfaa299c.png)
 
-We have our AppContainer that loads AppRoutes.
+我们的AppContainer用来加载AppRoutes。
 
-Notice how it uses relative imports. We want absolute imports.
+注意它是如何使用相对导入的。 我们需要绝对路径引入。
 
-1.  Create a ‘.**env**’ file at the root level (same level as package.json)
-2.  Set an environment variable, ‘**NODE_PATH**’ to ‘**src**/’
+1.  在根级目录创建'.** env **'文件（与package.json的级别相同）
+2.  设置一个环境变量， ‘**NODE_PATH**’ to ‘**src**/’
 
 ![](https://p0.ssl.qhimg.com/t01ea4f581bd313267d.png)
 
-And now we can use absolute imports.
+现在我们可以使用绝对导入。
 
-And it works just fine.
+它工作得很好。
 
 ![](https://p0.ssl.qhimg.com/t01ebd1e70323eabfaa.png)
 
-**Conclusion**
+**结论**
 
-Absolute imports can save you a lot of time and headaches because you no longer have to account for how many dots you need anytime you’re importing or changing the location of a file. Thanks to create-react-app it’s quite simple to set up an environment that allows you to do just that.
+绝对导入可以为您节省大量时间，不再那么头痛，因为您无需在导入或更改文件位置时随时考虑您需要的点数。 感谢create-react-app，设置一个允许你做到这一点的环境非常简单.
 
-_I’m a developer who documents new tools and concepts I come across and find interesting enough to share. Please click that heart button and/or leave a comment so I can write content more suited to your interests._
+_我是一位开发人员，他记录了我遇到的新工具和概念，并发现足够有趣以供分享。 请点击该按钮和/或留下评论，以便我可以写出更适合您兴趣的内容._
