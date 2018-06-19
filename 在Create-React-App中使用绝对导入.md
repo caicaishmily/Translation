@@ -91,3 +91,7 @@ The pull requests:
 绝对导入可以为您节省大量时间，不再那么头痛，因为您无需在导入或更改文件位置时随时考虑您需要的点数。 感谢create-react-app，设置一个允许你做到这一点的环境非常简单.
 
 _我是一位开发人员，他记录了我遇到的新工具和概念，并发现足够有趣以供分享。 请点击该按钮和/或留下评论，以便我可以写出更适合您兴趣的内容._
+
+### 原文链接
+
+https://medium.com/@ktruong008/absolute-imports-with-create-react-app-4338fbca7e3d
