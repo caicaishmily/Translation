@@ -58,3 +58,6 @@
 至于未来,我已经在期待JavaScript的未来发展方向. 就像 [可选链接操作员](https://www.bram.us/2017/01/30/javascript-null-propagation-operator/) 已经让我很兴奋了 😊
 
 _💻 The examples embedded in this post are part of a talk on ESNext named_ **_“What’s next for JavaScript?”_**_, which I recently gave at a_ [_Fronteers België_](https://fronteers.nl/vereniging/commissies/belgie) _meetup. I’m currently still in the process of preparing the slides for publication. I’m available for bringing this talk at your meetup/conference._
+
+### 原文链接
+  https://medium.com/front-end-hacking/javascript-whats-new-in-ecmascript-2018-es2018-17ede97f36d5
