@@ -79,3 +79,7 @@ Redux的开发人员社区领先于MobX社区。
 因为:
 
 ![](https://p0.ssl.qhimg.com/t01364fba67bb856029.gif)
+
+### 原文链接
+
+https://codeburst.io/mobx-vs-redux-with-react-a-noobs-comparison-and-questions-382ba340be09
