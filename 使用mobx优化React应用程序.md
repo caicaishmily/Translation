@@ -49,3 +49,7 @@
 ---
 
 您的网络应用程序是否存在性能问题？ [点我求助.](https://lavrton.com/web-perf.html)
+
+### 原文链接
+
+https://blog.lavrton.com/optimizing-react-application-with-mobx-f101785379d9?gi=e361991a0148
