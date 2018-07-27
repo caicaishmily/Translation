@@ -43,3 +43,7 @@
 #### 尝试支持受控组件而不是不受控制的组件
 
 始终尝试构建受控组件。 这使得测试组件和组件的整体复杂性易于处理。
+
+#### 原文链接
+
+https://medium.com/dailyjs/mobx-react-best-practices-17e01cec4140
